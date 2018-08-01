@@ -23,7 +23,8 @@
 #include <string>
 #include <stdexcept>
 #include <assert.h>
-#include "../math/hash.hpp"
+
+#include <math/hash.hpp>
 
 namespace chratex {
 namespace wallet {
@@ -102,6 +103,10 @@ mnemonic::mnemonic(
 
 
   assert(words.size() == ((bit + 1) / bits_per_word));
+}
+
+std::vector<std::string> mnemonic::get_words() const {
+  return words;
 }
 
 }

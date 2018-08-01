@@ -26,7 +26,7 @@
 #include <errno.h>
 #include <new>
 #include <stdexcept>
-#include "./external/sha256.h"
+#include <math/external/sha256.h>
 
 namespace chratex {
 hash_digest sha256_hash(data_slice data) {

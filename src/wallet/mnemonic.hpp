@@ -21,14 +21,12 @@
 #include <string>
 
 #include "dictionary.hpp"
-#include "../utility/data.hpp"
+#include <utility/data.hpp>
 
 namespace chratex {
 namespace wallet {
   static constexpr size_t mnemonic_word_multiple = 3;
   static constexpr size_t mnemonic_seed_multiple = 4;
-
-
 
   class mnemonic {
     public:

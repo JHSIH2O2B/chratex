@@ -25,7 +25,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
-#include "../utility/data.hpp"
+#include <utility/data.hpp>
 
 namespace chratex {
 
