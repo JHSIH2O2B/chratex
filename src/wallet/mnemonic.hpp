@@ -18,6 +18,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
+#ifndef CHRATEX_WALLET_MNEMONIC_HPP
+#define CHRATEX_WALLET_MNEMONIC_HPP
+
 #include <string>
 
 #include "dictionary.hpp"
@@ -84,6 +89,11 @@ namespace wallet {
        */
       long_hash to_seed() const;
 
+      /**
+       * Returns the seed associated with this mnemonic and encrypted.
+       */ 
+      long_hash to_seed(const std::string &password) const;
+
     private:
 
       std::vector<std::string> words;
@@ -92,3 +102,5 @@ namespace wallet {
   };
 }
 }
+
+#endif
