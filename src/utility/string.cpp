@@ -1,5 +1,4 @@
 /**
- * Copyright (c) 2011-2017 libbitcoin developers
  * Copyright (c) 2018 chratex developers (see AUTHORS)
  *
  * This file is part of chratex.
@@ -18,36 +17,23 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#pragma once
-#ifndef CHRATEX_DATA_IPP
-#define CHRATEX_DATA_IPP
+#include <utility/string.hpp>
+#include <sstream>
 
-namespace chratex {
+std::string chratex::join(
+  const std::vector<std::string> &words,
+  const std::string &delimiter
+) {
 
-inline data_chunk to_chunk(uint8_t byte) {
-  return data_chunk{ byte };
-}
+  std::stringstream joined;
 
-inline data_chunk build_chunk(loaf slices, size_t extra_reserve) {
-  size_t size = 0;
-  for (const auto slice: slices) {
-    size += slice.size();
+  for (int i = 0; i < words.size(); i++) {
+    joined << words[i];
+
+    if ((i + 1) < words.size()) {
+      joined << delimiter;
+    }
   }
 
-  data_chunk out;
-  out.reserve(size + extra_reserve);
-  for (const auto slice: slices) {
-    out.insert(out.end(), slice.begin(), slice.end());
-  }
-
-  return out;
+  return joined.str();
 }
-
-template <typename Source>
-data_chunk to_chunk(const Source& bytes) {
-  return data_chunk(std::begin(bytes), std::end(bytes));
-}
-
-}
-
-#endif

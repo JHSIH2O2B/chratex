@@ -17,36 +17,27 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef CHRATEX_CONSTANTS_HPP
+#define CHRATEX_CONSTANTS_HPP
 
-#pragma once
-#ifndef CHRATEX_DATA_IPP
-#define CHRATEX_DATA_IPP
+#include <cstddef>
+#include <cstdint>
 
 namespace chratex {
 
-inline data_chunk to_chunk(uint8_t byte) {
-  return data_chunk{ byte };
-}
+// Generic constants.
+//-----------------------------------------------------------------------------
 
-inline data_chunk build_chunk(loaf slices, size_t extra_reserve) {
-  size_t size = 0;
-  for (const auto slice: slices) {
-    size += slice.size();
-  }
-
-  data_chunk out;
-  out.reserve(size + extra_reserve);
-  for (const auto slice: slices) {
-    out.insert(out.end(), slice.begin(), slice.end());
-  }
-
-  return out;
-}
-
-template <typename Source>
-data_chunk to_chunk(const Source& bytes) {
-  return data_chunk(std::begin(bytes), std::end(bytes));
-}
+constexpr int64_t min_int64 = std::numeric_limits<int64_t>::min();
+constexpr int64_t max_int64 = std::numeric_limits<int64_t>::max();
+constexpr int32_t min_int32 = std::numeric_limits<int32_t>::min();
+constexpr int32_t max_int32 = std::numeric_limits<int32_t>::max();
+constexpr uint64_t max_uint64 = std::numeric_limits<uint64_t>::max();
+constexpr uint32_t max_uint32 = std::numeric_limits<uint32_t>::max();
+constexpr uint16_t max_uint16 = std::numeric_limits<uint16_t>::max();
+constexpr uint8_t max_uint8 = std::numeric_limits<uint8_t>::max();
+constexpr uint64_t max_size_t = std::numeric_limits<size_t>::max();
+constexpr uint8_t byte_bits = 8;
 
 }
 

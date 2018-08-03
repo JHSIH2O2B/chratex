@@ -29,7 +29,7 @@
 #include <iterator>
 #include <queue>
 #include <vector>
-#include "array_slice.hpp"
+#include <utility/array_slice.hpp>
 
 namespace chratex {
 
@@ -53,15 +53,24 @@ typedef std::queue<data_chunk> data_queue;
 typedef std::vector<data_chunk> data_stack;
 typedef std::initializer_list<data_slice> loaf;
 
-
-constexpr uint8_t byte_bits = 8;
-
 /**
  * Concatenate several data slices into a single data_chunk.
  * @param  extra_reserve  Include this many additional bytes when calling
  * `reserve` on the data_chunk (as an optimization).
  */
 inline data_chunk build_chunk(loaf slices, size_t extra_reserve=0);
+
+/**
+* Create a single byte data chunk with an initial value.
+*/
+inline data_chunk to_chunk(uint8_t byte);
+
+/**
+ * Create a data chunk from an iterable object.
+ */
+template <typename Source>
+data_chunk to_chunk(const Source& bytes);
+
 }
 
 #include "data.ipp"

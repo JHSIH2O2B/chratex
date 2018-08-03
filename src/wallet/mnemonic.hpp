@@ -22,6 +22,7 @@
 
 #include "dictionary.hpp"
 #include <utility/data.hpp>
+#include <math/hash.hpp>
 
 namespace chratex {
 namespace wallet {
@@ -63,9 +64,25 @@ namespace wallet {
         const dictionary &lexicon=language::en
       );
 
-      bool is_valid();
+      /**
+       * Checks that the mnemonic is valid in at least one of the languages.
+       */
+      bool is_valid(const dictionary_list &lexicons = language::all) const;
 
+      /**
+       * Checks that the mnemonic is valid in the language provided.
+       */
+      bool is_valid(const dictionary &lexicon) const;
+
+      /**
+       * Returns a vector of the words that compose this mnemonic phrase.
+       */
       std::vector<std::string> get_words() const;
+
+      /**
+       * Returns the seed associated with this mnemonic.
+       */
+      long_hash to_seed() const;
 
     private:
 

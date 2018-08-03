@@ -17,37 +17,21 @@
  * You should have received a copy of the GNU Affero General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+#ifndef CHRATEX_ASSERT_HPP
+#define CHRATEX_ASSERT_HPP
 
-#pragma once
-#ifndef CHRATEX_DATA_IPP
-#define CHRATEX_DATA_IPP
+#ifdef NDEBUG
+  #define CHRATEX_ASSERT(expression)
+  #define CHRATEX_ASSERT_MSG(expression, text)
+  #define DEBUG_ONLY(expression)
+#else
+  #include <cassert>
+  #define CHRATEX_ASSERT(expression) assert(expression)
+  #define CHRATEX_ASSERT_MSG(expression, text) assert((expression)&&(text))
+  #define DEBUG_ONLY(expression) expression
+#endif
 
-namespace chratex {
-
-inline data_chunk to_chunk(uint8_t byte) {
-  return data_chunk{ byte };
-}
-
-inline data_chunk build_chunk(loaf slices, size_t extra_reserve) {
-  size_t size = 0;
-  for (const auto slice: slices) {
-    size += slice.size();
-  }
-
-  data_chunk out;
-  out.reserve(size + extra_reserve);
-  for (const auto slice: slices) {
-    out.insert(out.end(), slice.begin(), slice.end());
-  }
-
-  return out;
-}
-
-template <typename Source>
-data_chunk to_chunk(const Source& bytes) {
-  return data_chunk(std::begin(bytes), std::end(bytes));
-}
-
-}
+// This is used to prevent bogus compiler warnings about unused variables.
+#define UNUSED(expression) (void)(expression)
 
 #endif

@@ -25,6 +25,9 @@
 #include <assert.h>
 
 #include <math/hash.hpp>
+#include <math/external/pkcs5_pbkdf2.h>
+#include <utility/collection.hpp>
+#include <utility/string.hpp>
 
 namespace chratex {
 namespace wallet {
@@ -107,6 +110,60 @@ mnemonic::mnemonic(
 
 std::vector<std::string> mnemonic::get_words() const {
   return words;
+}
+
+bool mnemonic::is_valid(const dictionary_list &lexicons) const {
+  for (const auto &lexicon : lexicons) {
+    if (is_valid(*lexicon)) { return true; }
+  }
+
+  return false;
+}
+
+bool mnemonic::is_valid(const dictionary &lexicon) const {
+  const auto word_count = words.size();
+  if ((word_count % mnemonic_word_multiple) != 0) {
+    return false;
+  }
+
+  const auto total_bits = bits_per_word * word_count;
+  const auto check_bits = total_bits / (entropy_bit_divisor + 1);
+  const auto entropy_bits = total_bits - check_bits;
+
+  if ((entropy_bits % byte_bits) != 0) {
+    throw new std::runtime_error("Incorrect number of entropy bits");
+  }
+
+  size_t bit = 0;
+  data_chunk data((total_bits + byte_bits - 1) / byte_bits, 0);
+
+  for (const auto& word: words) {
+    const auto position = find_position(lexicon, word);
+    if (position == -1) {
+      return false;
+    }
+
+    for (size_t loop = 0; loop < bits_per_word; loop++, bit++) {
+      if (position & (1 << (bits_per_word - loop - 1))) {
+        const auto byte = bit / byte_bits;
+        data[byte] |= bip39_shift(bit);
+      }
+    }
+  }
+
+  data.resize(entropy_bits / byte_bits);
+  const auto mnemonic = chratex::wallet::mnemonic(data, lexicon);
+  const auto m_words = mnemonic.get_words();
+  return std::equal(m_words.begin(), m_words.end(), words.begin());
+}
+
+long_hash mnemonic::to_seed() const {
+  const auto words = get_words();
+  const auto sentence = join(words);
+  const std::string salt(passphrase_prefix);
+  return pkcs5_pbkdf2_hmac_sha512(
+    to_chunk(sentence), to_chunk(salt), hmac_iterations
+  );
 }
 
 }

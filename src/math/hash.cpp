@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <new>
 #include <stdexcept>
+#include <math/external/pkcs5_pbkdf2.h>
 #include <math/external/sha256.h>
 
 namespace chratex {
@@ -50,5 +51,24 @@ hash_digest sha256_hash(data_slice first, data_slice second) {
   SHA256Final(&context, hash.data());
   return hash;
 }
+
+long_hash pkcs5_pbkdf2_hmac_sha512(
+  data_slice passphrase,
+  data_slice salt,
+  size_t iterations
+) {
+  long_hash hash;
+  const auto result = pkcs5_pbkdf2(
+    passphrase.data(), passphrase.size(), salt.data(), salt.size(),
+    hash.data(), hash.size(), iterations
+  );
+
+  if (result != 0) {
+    throw std::bad_alloc();
+  }
+
+  return hash;
+}
+
 }
 

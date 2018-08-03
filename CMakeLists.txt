@@ -25,6 +25,10 @@ add_library(wallet
   ${wallet_files}
 )
 
+add_library(utility
+  ${utility_files}
+)
+
 add_library(math
   ${math_files}
   ${external_files}
@@ -38,8 +42,8 @@ add_executable(chratex_test
   ${wallet_test_files}
 )
 
-target_link_libraries(chratexd wallet math)
+target_link_libraries(chratexd wallet math utility)
 
-target_link_libraries(chratex_test gtest_main wallet math)
+target_link_libraries(chratex_test gtest_main wallet math utility)
 
 target_compile_features(chratexd PUBLIC cxx_std_11)

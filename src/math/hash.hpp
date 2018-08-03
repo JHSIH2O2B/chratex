@@ -60,6 +60,13 @@ data_chunk sha256_hash_chunk(data_slice data);
 /// Generate a sha256 hash.
 /// This hash function was used in electrum seed stretching (obsoleted).
 hash_digest sha256_hash(data_slice first, data_slice second);
+
+/// Generate a pkcs5 pbkdf2 hmac sha512 hash.
+long_hash pkcs5_pbkdf2_hmac_sha512(
+  data_slice passphrase,
+  data_slice salt,
+  size_t iterations
+);
 }
 
 #endif
