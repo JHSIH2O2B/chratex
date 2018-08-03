@@ -17,9 +17,13 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "mnemonic.hpp"
 #include <gtest/gtest.h>
+
 #include <wallet/mnemonic.hpp>
 #include <utility/data.hpp>
+#include <formats/base_16.hpp>
+
 #include <string>
 
 void check_words(
@@ -34,6 +38,41 @@ void check_words(
   }
 }
 
+TEST(mnemonic, decode_mnemonic_no_passphrase) {
+  for (const auto &vector : mnemonic_no_passphrase) {
+    const auto words = vector.mnemonic;
+    auto mn = chratex::wallet::mnemonic(words, vector.language);
+
+    ASSERT_TRUE(mn.is_valid());
+    const auto seed = mn.to_seed();
+    ASSERT_EQ(chratex::encode_base16(seed), vector.seed);
+  }
+}
+
+/*
+TEST(mnemonic, decode_mnemonic_trezor) {
+  for (const auto& vector: mnemonic_trezor_vectors) {
+    const auto words = split(vector.mnemonic, ",");
+    auto mn = chratex::wallet::mnemonic(words, vector.language);
+
+    ASSERT_TRUE(mn.is_valid());
+
+    const auto seed = (words, vector.passphrase);
+    ASSERT_EQ(chratex::encode_base16(seed), vector.seed);
+  }
+}
+
+TEST(mnemonic__decode_mnemonic__bx) {
+  for (const auto& vector: mnemonic_bx_to_seed_vectors) {
+    const auto words = split(vector.mnemonic, ",");
+    auto mn = chratex::wallet::mnemonic(words, vector.language);
+
+    ASSERT_TRUE(validate_mnemonic(words));
+    const auto seed = decode_mnemonic(words, vector.passphrase);
+    BOOST_REQUIRE_EQUAL(chratex::encode_base16(seed), vector.seed);
+  }
+}
+*/
 TEST(mnemonic, initialized_with_12_word_string) {
     
   std::string phrase = "abandon abandon abandon abandon abandon abandon "
