@@ -24,6 +24,7 @@
 
 #include <string>
 #include <vector>
+#include <wallet/dictionary.hpp>
 #include <wallet/mnemonic.hpp>
 
 struct mnemonic_result {
@@ -36,7 +37,7 @@ struct mnemonic_result {
 
 typedef std::vector<mnemonic_result> mnemonic_result_list;
 
-const mnemonic_result_list mnemonic_trezor_vectors =
+const mnemonic_result_list mnemonic_trezor_vectors
 {
   {
     {

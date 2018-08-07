@@ -25,9 +25,10 @@
 
 #include <string>
 
-#include "dictionary.hpp"
+#include <wallet/dictionary.hpp>
 #include <utility/data.hpp>
 #include <math/hash.hpp>
+#include <boost/locale.hpp>
 
 namespace chratex {
 namespace wallet {
@@ -88,11 +89,6 @@ namespace wallet {
        * Returns the seed associated with this mnemonic.
        */
       long_hash to_seed() const;
-
-      /**
-       * Returns the seed associated with this mnemonic and encrypted.
-       */ 
-      long_hash to_seed(const std::string &password) const;
 
     private:
 
