@@ -22,6 +22,7 @@
 
 #include <wallet/mnemonic.hpp>
 #include <utility/data.hpp>
+#include <utility/string.hpp>
 #include <formats/base_16.hpp>
 
 #include <string>
@@ -49,30 +50,6 @@ TEST(mnemonic, decode_mnemonic_no_passphrase) {
   }
 }
 
-/*
-TEST(mnemonic, decode_mnemonic_trezor) {
-  for (const auto& vector: mnemonic_trezor_vectors) {
-    const auto words = split(vector.mnemonic, ",");
-    auto mn = chratex::wallet::mnemonic(words, vector.language);
-
-    ASSERT_TRUE(mn.is_valid());
-
-    const auto seed = (words, vector.passphrase);
-    ASSERT_EQ(chratex::encode_base16(seed), vector.seed);
-  }
-}
-
-TEST(mnemonic__decode_mnemonic__bx) {
-  for (const auto& vector: mnemonic_bx_to_seed_vectors) {
-    const auto words = split(vector.mnemonic, ",");
-    auto mn = chratex::wallet::mnemonic(words, vector.language);
-
-    ASSERT_TRUE(validate_mnemonic(words));
-    const auto seed = decode_mnemonic(words, vector.passphrase);
-    BOOST_REQUIRE_EQUAL(chratex::encode_base16(seed), vector.seed);
-  }
-}
-*/
 TEST(mnemonic, initialized_with_12_word_string) {
     
   std::string phrase = "abandon abandon abandon abandon abandon abandon "
@@ -112,4 +89,128 @@ TEST(mnemonic, initialized_with_entropy) {
   check_words(mn, expected);
 
   ASSERT_TRUE(mn.is_valid()) << "Phrase should be valid";
+}
+
+TEST(mnemonic, create_mnemonic_trezor) {
+  for (const auto &vector : mnemonic_trezor_vectors) {
+    chratex::data_chunk entropy;
+    chratex::decode_base16(entropy, vector.entropy);
+    const auto mnemonic = chratex::wallet::mnemonic(entropy);
+    const auto words = mnemonic.get_words();
+
+    EXPECT_TRUE(words.size() > 0);
+    EXPECT_EQ(vector.mnemonic, chratex::join(words));
+    EXPECT_TRUE(mnemonic.is_valid());
+  }
+}
+
+TEST(mnemonic, validate_mnemonic__invalid) {
+  for (const auto& vector: invalid_mnemonic_tests) {
+    const auto mnemonic = chratex::wallet::mnemonic(vector);
+    EXPECT_FALSE(mnemonic.is_valid());
+  }
+}
+
+TEST(mnemonic, create_mnemonic__tiny) {
+  const chratex::data_chunk entropy(4, 0xa9);
+  const auto mnemonic = chratex::wallet::mnemonic(entropy);
+  const auto words = mnemonic.get_words();
+
+  ASSERT_EQ(words.size(), 3u);
+  ASSERT_TRUE(mnemonic.is_valid());
+}
+
+TEST(mnemonic, create_mnemonic__giant) {
+  const chratex::data_chunk entropy(1024, 0xa9);
+  const auto mnemonic = chratex::wallet::mnemonic(entropy);
+  const auto words = mnemonic.get_words();
+
+  ASSERT_EQ(words.size(), 768u);
+  ASSERT_TRUE(mnemonic.is_valid());
+}
+
+TEST(mnemonic, dictionary__en_es__no_intersection) {
+  const auto& english = chratex::wallet::language::en;
+  const auto& spanish = chratex::wallet::language::es;
+  for (const auto es: spanish) {
+    std::string test(es);
+    const auto it = std::find(english.begin(), english.end(), test);
+    EXPECT_EQ(it, std::end(english));
+  }
+}
+
+TEST(mnemonic, dictionary__en_it__no_intersection) {
+  const auto& english = chratex::wallet::language::en;
+  const auto& italian = chratex::wallet::language::it;
+  for (const auto it: italian) {
+    std::string test(it);
+    const auto iter = std::find(english.begin(), english.end(), test);
+    EXPECT_EQ(iter, std::end(english));
+  }
+}
+
+TEST(mnemonic, dictionary__fr_es__no_intersection) {
+  const auto& french = chratex::wallet::language::fr;
+  const auto& spanish = chratex::wallet::language::es;
+  for (const auto es: spanish) {
+    std::string test(es);
+    const auto it = std::find(french.begin(), french.end(), test);
+    EXPECT_EQ(it, std::end(french));
+  }
+}
+
+TEST(mnemonic, dictionary__it_es__no_intersection) {
+  const auto& italian = chratex::wallet::language::it;
+  const auto& spanish = chratex::wallet::language::es;
+  for (const auto es: spanish) {
+    std::string test(es);
+    const auto it = std::find(italian.begin(), italian.end(), test);
+    EXPECT_EQ(it, std::end(italian));
+  }
+}
+
+TEST(mnemonic, dictionary__fr_it__no_intersection) {
+  const auto& french = chratex::wallet::language::fr;
+  const auto& italian = chratex::wallet::language::it;
+  for (const auto it: italian) {
+    std::string test(it);
+    const auto iter = std::find(french.begin(), french.end(), test);
+    EXPECT_EQ(iter, std::end(french));
+  }
+}
+
+TEST(mnemonic, dictionary__cs_ru__no_intersection) {
+  const auto& czech = chratex::wallet::language::cs;
+  const auto& russian = chratex::wallet::language::ru;
+  for (const auto ru: russian) {
+    std::string test(ru);
+    const auto iter = std::find(czech.begin(), czech.end(), test);
+    EXPECT_EQ(iter, std::end(czech));
+  }
+}
+
+TEST(mnemonic, dictionary__cs_uk__no_intersection) {
+  const auto& czech = chratex::wallet::language::cs;
+  const auto& ukranian = chratex::wallet::language::uk;
+
+  for (const auto uk: ukranian) {
+    std::string test(uk);
+    const auto iter = std::find(czech.begin(), czech.end(), test);
+    EXPECT_EQ(std::end(czech), iter);
+  }
+}
+
+TEST(mnemonic, dictionary__zh_Hans_Hant__intersection) {
+  const auto& simplified = chratex::wallet::language::zh_Hans;
+  const auto& traditional = chratex::wallet::language::zh_Hant;
+  size_t intersection = 0;
+  for (const auto hant: traditional) {
+    std::string test(hant);
+    const auto it = std::find(simplified.begin(), simplified.end(), test);
+    if (it != std::end(simplified)) {
+      intersection++;
+    }
+  }
+
+  ASSERT_EQ(1275u, intersection);
 }

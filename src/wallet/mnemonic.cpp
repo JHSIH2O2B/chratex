@@ -101,6 +101,7 @@ mnemonic::mnemonic(
     if (dictionary_size < position) {
       throw std::runtime_error("Incorrect position");
     }
+
     words.push_back(lexicon[position]);
   }
 

@@ -18,7 +18,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "dictionary.hpp"
+#include <wallet/dictionary.hpp>
 
 namespace chratex {
 namespace wallet {

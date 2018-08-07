@@ -6,6 +6,12 @@ include_directories("${CMAKE_SOURCE_DIR}/src")
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
 
+find_package (Boost
+  REQUIRED COMPONENTS 
+  filesystem system thread program_options
+)
+include_directories (${Boost_INCLUDE_DIR})
+
 add_subdirectory(gtest)
 include_directories("gtest/include")
 
@@ -47,8 +53,17 @@ add_executable(chratex_test
   ${wallet_test_files}
 )
 
-target_link_libraries(chratexd wallet math utility formats)
+target_link_libraries(chratexd
+  wallet
+  math
+  utility
+  formats
+  ${Boost_LIBRARIES}
+)
 
-target_link_libraries(chratex_test gtest_main wallet math utility formats)
+target_link_libraries(chratex_test 
+  gtest_main wallet math utility formats
+  ${Boost_LIBRARIES}
+)
 
 target_compile_features(chratexd PUBLIC cxx_std_11)
