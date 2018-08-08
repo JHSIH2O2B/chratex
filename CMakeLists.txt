@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.8)
 project (chratos-exchange LANGUAGES CXX C)
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
+include_directories("gtest/include")
+include_directories("libbitcoin/include")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
@@ -13,18 +15,29 @@ find_package (Boost
 include_directories (${Boost_INCLUDE_DIR})
 
 add_subdirectory(gtest)
-include_directories("gtest/include")
-
 add_subdirectory(libbitcoin)
-include_directories("libbitcoin/include")
+
+add_library (lmdb
+	lmdb/libraries/liblmdb/lmdb.h
+	lmdb/libraries/liblmdb/mdb.c
+	lmdb/libraries/liblmdb/midl.c)
+
+if (WIN32)
+	target_link_libraries(lmdb ntdll)
+endif()
 
 file(GLOB source_files "${CMAKE_SOURCE_DIR}/src/*.cpp")
+file(GLOB utility_files "${CMAKE_SOURCE_DIR}/src/utility/*.cpp")
 
 file(GLOB test_files "${CMAKE_SOURCE_DIR}/test/*.cpp")
 
 set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+add_library(libchratex
+  ${utility_files}
+)
 
 add_executable(chratexd
   ${source_files}
@@ -36,6 +49,8 @@ add_executable(chratex_test
 
 target_link_libraries(chratexd
   libbitcoin
+  libchratex
+  lmdb
   ${Boost_LIBRARIES}
 )
 
