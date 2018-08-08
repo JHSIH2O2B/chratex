@@ -15,55 +15,34 @@ include_directories (${Boost_INCLUDE_DIR})
 add_subdirectory(gtest)
 include_directories("gtest/include")
 
-file(GLOB source_files "${CMAKE_SOURCE_DIR}/src/*.cpp")
-file(GLOB wallet_files "${CMAKE_SOURCE_DIR}/src/wallet/*.cpp")
-file(GLOB utility_files "${CMAKE_SOURCE_DIR}/src/utility/*.cpp")
-file(GLOB external_files "${CMAKE_SOURCE_DIR}/src/math/external/*.c")
-file(GLOB math_files "${CMAKE_SOURCE_DIR}/src/math/*")
-file(GLOB format_files "${CMAKE_SOURCE_DIR}/src/formats/*.cpp")
+add_subdirectory(libbitcoin)
+include_directories("libbitcoin/include")
 
-file (GLOB wallet_test_files "${CMAKE_SOURCE_DIR}/test/wallet/*.cpp")
+file(GLOB source_files "${CMAKE_SOURCE_DIR}/src/*.cpp")
+
+file(GLOB test_files "${CMAKE_SOURCE_DIR}/test/*.cpp")
 
 set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
-
-add_library(wallet
-  ${wallet_files}
-)
-
-add_library(utility
-  ${utility_files}
-)
-
-add_library(math
-  ${math_files}
-  ${external_files}
-)
-
-add_library(formats
-  ${format_files}
-)
 
 add_executable(chratexd
   ${source_files}
 )
 
 add_executable(chratex_test
-  ${wallet_test_files}
+  ${test_files}
 )
 
 target_link_libraries(chratexd
-  wallet
-  math
-  utility
-  formats
+  libbitcoin
   ${Boost_LIBRARIES}
 )
 
 target_link_libraries(chratex_test 
-  gtest_main wallet math utility formats
+  gtest_main
   ${Boost_LIBRARIES}
 )
 
 target_compile_features(chratexd PUBLIC cxx_std_11)
+target_compile_features(chratex_test PUBLIC cxx_std_11)
