@@ -26,6 +26,40 @@ if (WIN32)
 	target_link_libraries(lmdb ntdll)
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  set(WORKING_DIR
+    "${CMAKE_SOURCE_DIR}/src/utility/platform/macos/working_dir.mm"
+  )
+  set(CMAKE_C_FLAGS "-x objective-c")
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+  set(WORKING_DIR
+    "${CMAKE_SOURCE_DIR}/src/utility/platform/windows/working_dir.cpp"
+  )
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+  set(WORKING_DIR 
+    "${CMAKE_SOURCE_DIR}/src/utility/platform/posix/working_dir.cpp"
+  )
+elseif (${CMAKE_SYSTEM_NAME} MATCHES "FreeBSD")
+  set(WORKING_DIR 
+    "${CMAKE_SOURCE_DIR}/src/utility/platform/posix/working_dir.cpp"
+  )
+else ()
+	error ("Unknown platform: ${CMAKE_SYSTEM_NAME}")
+endif ()
+
+if (APPLE)
+	set(PLATFORM_LINK_FLAGS "-framework Foundation -framework OpenCL")
+elseif (WIN32)
+	set(PLATFORM_LINK_FLAGS "")
+else ()
+	set(PLATFORM_LINK_FLAGS "-static-libgcc -static-libstdc++")
+endif ()
+
+SET (ACTIVE_NETWORK live_network CACHE STRING "Selects which network parameters are used")
+set_property (CACHE ACTIVE_NETWORK PROPERTY STRINGS test_network beta_network live_network)
+
 file(GLOB source_files "${CMAKE_SOURCE_DIR}/src/*.cpp")
 file(GLOB utility_files "${CMAKE_SOURCE_DIR}/src/utility/*.cpp")
 
@@ -36,8 +70,11 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 add_library(libchratex
+  src/config.hpp
   ${utility_files}
+  ${WORKING_DIR}
 )
+
 
 add_executable(chratexd
   ${source_files}
@@ -52,11 +89,27 @@ target_link_libraries(chratexd
   libchratex
   lmdb
   ${Boost_LIBRARIES}
+  ${PLATFORM_LINK_FLAGS}
 )
 
 target_link_libraries(chratex_test 
   gtest_main
   ${Boost_LIBRARIES}
+)
+
+target_compile_definitions(libbitcoin
+	PUBLIC
+		-DACTIVE_NETWORK=${ACTIVE_NETWORK}
+)
+
+target_compile_definitions(libchratex
+	PUBLIC
+		-DACTIVE_NETWORK=${ACTIVE_NETWORK}
+)
+
+target_compile_definitions(chratexd
+	PUBLIC
+		-DACTIVE_NETWORK=${ACTIVE_NETWORK}
 )
 
 target_compile_features(chratexd PUBLIC cxx_std_11)
