@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
+#ifndef CHRATEX_RPC_SERVER_HPP
+#define CHRATEX_RPC_SERVER_HPP
+
 #include <net/server.hpp>
 
 namespace chratex {
@@ -38,3 +43,5 @@ private:
 
 }
 }
+
+#endif
