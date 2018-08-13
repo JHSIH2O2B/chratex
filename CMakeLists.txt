@@ -64,6 +64,7 @@ set_property (CACHE ACTIVE_NETWORK PROPERTY STRINGS test_network beta_network li
 file(GLOB source_files "${CMAKE_SOURCE_DIR}/src/*.cpp")
 file(GLOB utility_files "${CMAKE_SOURCE_DIR}/src/utility/*.cpp")
 file(GLOB net_files "${CMAKE_SOURCE_DIR}/src/net/*.cpp")
+file(GLOB rpc_files "${CMAKE_SOURCE_DIR}/src/rpc/*.cpp")
 file(GLOB test_files "${CMAKE_SOURCE_DIR}/test/*.cpp")
 
 set(CMAKE_CXX_FLAGS "-Wall")
@@ -73,6 +74,7 @@ set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 add_library(libchratex
   src/config.hpp
   ${net_files}
+  ${rpc_files}
   ${utility_files}
   ${WORKING_DIR}
 )
