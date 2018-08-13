@@ -19,7 +19,7 @@
 
 #include <database/lmdb.hpp>
 
-using namespace chratex::database
+using namespace chratex::database;
 
 mdb_env::mdb_env(
   bool &error_a, boost::filesystem::path const & path_a, int max_dbs
@@ -48,6 +48,62 @@ mdb_env::mdb_env(
   }
 }
 
-mdb_env::~mdb_env(
+mdb_env::~mdb_env() {
+	if (environment != nullptr) {
+		mdb_env_close (environment);
+	}
+}
 
-)
+mdb_env::operator MDB_env *() const {
+	return environment;
+}
+
+mdb_val::mdb_val (
+  chratex::epoch epoch_a
+) : value ({ 0, nullptr }), epoch (epoch_a) {
+}
+
+mdb_val::mdb_val(
+  MDB_val const & value_a, chratex::epoch epoch_a
+) : value (value_a), epoch (epoch_a) {
+}
+
+mdb_val::mdb_val(size_t size_a, void * data_a) : value ({ size_a, data_a }) {
+}
+
+void * mdb_val::data() const {
+	return value.mv_data;
+}
+
+size_t mdb_val::size() const {
+	return value.mv_size;
+}
+
+mdb_val::operator MDB_val *() const {
+	// Allow passing a temporary to a non-c++ function which
+  // doesn't have constness
+	return const_cast<MDB_val *>(&value);
+};
+
+mdb_val::operator MDB_val const &() const {
+	return value;
+}
+
+transaction::transaction(
+  mdb_env & environment_a, MDB_txn * parent_a, bool write
+) : environment (environment_a) {
+	auto status(
+    mdb_txn_begin(environment_a, parent_a, write ? 0 : MDB_RDONLY, &handle)
+  );
+	assert (status == 0);
+}
+
+transaction::~transaction () {
+	auto status(mdb_txn_commit(handle));
+	assert(status == 0);
+}
+
+transaction::operator MDB_txn *() const {
+	return handle;
+}
+

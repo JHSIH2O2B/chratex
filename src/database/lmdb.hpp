@@ -22,18 +22,34 @@
 #ifndef CHRATEX_DATABASE_LMDB_HPP
 #define CHRATEX_DATABASE_LMDB_HPP
 
+#include <common.hpp>
 #include <boost/filesystem.hpp>
 #include <liblmdb/lmdb.h>
 
 namespace chratex {
 namespace database {
 
-  class mbd_env {
+  class mdb_env {
     public: 
-      mbd_env(bool &, boost::filesystem::path const &, int max_dbs = 128);
-      ~mbd_env();
-      operator MBD_env *()const;
+      mdb_env(bool &, boost::filesystem::path const &, int max_dbs = 128);
+      ~mdb_env();
+      operator MDB_env *()const;
+    private:
       MDB_env *environment;
+  };
+
+  class mdb_val {
+    public:
+      mdb_val(chratex::epoch = chratex::epoch::unspecified);
+      mdb_val(MDB_val const &, chratex::epoch = chratex::epoch::unspecified);
+      mdb_val(size_t, void *);
+      void *data() const;
+      size_t size() const;
+      operator MDB_val *() const;
+      operator MDB_val const &() const;
+      MDB_val value;
+      std::shared_ptr<std::vector<uint8_t>> buffer;
+      chratex::epoch epoch;
   };
 
   class transaction {
@@ -41,8 +57,9 @@ namespace database {
       transaction(chratex::database::mdb_env &, MDB_txn *, bool);
       ~transaction();
       operator MDB_txn *() const;
+    private:
       MDB_txn *handle;
-      rai::mdb_env &environment;
+      mdb_env &environment;
   };
 }
 }
