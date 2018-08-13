@@ -25,6 +25,8 @@ namespace rpc {
 class server {
 public:
 
+  server();
+
   void start();
 
   void stop();
