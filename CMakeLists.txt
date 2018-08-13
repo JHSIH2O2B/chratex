@@ -4,6 +4,7 @@ project (chratos-exchange LANGUAGES CXX C)
 include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("gtest/include")
 include_directories("libbitcoin/include")
+include_directories("lmdb/libraries")
 
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
