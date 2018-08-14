@@ -22,4 +22,56 @@
 #ifndef CHRATEX_WALLET_STORE_HPP
 #define CHRATEX_WALLET_STORE_HPP
 
+#include <database/lmdb.hpp>
+#include <lib/numbers.hpp>
+#include <config.hpp>
+#include <string>
+
+namespace chratex {
+namespace wallet {
+
+class kdf {
+public:
+	void phs(
+    chratex::raw_key &result,
+    std::string const &password,
+    chratex::uint256_union const &salt
+  );
+	std::mutex mutex;
+};
+
+class store {
+public:
+  store(
+    bool & init, 
+    chratex::wallet::kdf & kdf, 
+    chratex::database::transaction & transaction, 
+    chratex::account representative, 
+    unsigned fanout,
+    std::string const &wallet
+  );
+
+  store(
+    bool & init, 
+    chratex::wallet::kdf & kdf,
+    chratex::database::transaction & transaction,
+    chratex::account representative,
+    unsigned fanout,
+    std::string const & wallet,
+    std::string const & json
+  );
+
+  static unsigned constexpr kdf_full_work = 64 * 1024;
+
+	static unsigned constexpr kdf_test_work = 8;
+
+	static unsigned constexpr kdf_work = chratex::network::current == 
+    chratex::networks::test_network ? kdf_test_work : kdf_full_work;
+
+private:
+};
+
+}
+}
+
 #endif

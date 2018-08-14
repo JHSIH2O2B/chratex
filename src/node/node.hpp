@@ -17,23 +17,15 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <wallet/store.hpp>
-#include <argon2.h>
+#include <memory>
 
-void chratex::wallet::kdf::phs(
-  chratex::raw_key &result,
-  std::string const &password,
-  chratex::uint256_union const & salt
-) {
-	std::lock_guard<std::mutex> lock(mutex);
-	auto success(
-    argon2_hash(
-      1, chratex::wallet::store::kdf_work, 1, password.data(), 
-      password.size(), salt.bytes.data(), salt.bytes.size(), 
-      result.data.bytes.data(), result.data.bytes.size(), NULL, 0,
-      Argon2_d, 0x10
-    )
-  );
-	assert(success == 0);
-	(void)success;
+namespace chratex {
+namespace node {
+class node : public std::enable_shared_from_this<chratex::node::node> {
+  public:
+
+  private:
+    chratex::node::config config;
+};
+}
 }
