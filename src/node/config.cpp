@@ -17,6 +17,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <wallet/store.hpp>
-#include <argon2.h>
+#include <node/config.hpp>
+
+using namespace chratex::node;
+
+config::config() {
+}
+
 

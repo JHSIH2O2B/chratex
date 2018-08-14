@@ -17,15 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#pragma once
+
+#ifndef CHRATEX_NODE_NODE_HPP
+#define CHRATEX_NODE_NODE_HPP
+
 #include <memory>
+#include <node/config.hpp>
+#include <wallet/wallets.hpp>
 
 namespace chratex {
-namespace node {
-class node : public std::enable_shared_from_this<chratex::node::node> {
+class node: public std::enable_shared_from_this<chratex::node> {
   public:
-
-  private:
-    chratex::node::config config;
+    chratex::node_config config;
+    chratex::wallets wallets;
 };
 }
-}
+
+#endif

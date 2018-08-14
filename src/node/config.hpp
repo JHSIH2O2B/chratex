@@ -19,11 +19,19 @@
 
 #pragma once
 
-#ifndef 
+#ifndef CHRATEX_NODE_CONFIG_HPP
+#define CHRATEX_NODE_CONFIG_HPP
+
+#include <lib/numbers.hpp>
 
 namespace chratex {
-class config {
+class node_config {
   public:
-    config();
+    node_config();
+    unsigned password_fanout;
+    chratex::account random_representative();
+
+};
 }
-}
+
+#endif

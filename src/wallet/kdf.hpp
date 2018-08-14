@@ -17,6 +17,22 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <wallet/store.hpp>
-#include <argon2.h>
+#pragma once
 
+#ifndef CHRATEX_WALLET_KDF_HPP
+#define CHRATEX_WALLET_KDF_HPP
+
+namespace chratex {
+
+class kdf {
+public:
+	void phs(
+    chratex::raw_key &result,
+    std::string const &password,
+    chratex::uint256_union const &salt
+  );
+	std::mutex mutex;
+};
+
+}
+#endif

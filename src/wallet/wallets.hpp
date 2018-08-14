@@ -17,6 +17,21 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <wallet/store.hpp>
-#include <argon2.h>
+#pragma once
 
+#ifndef CHRTEX_WALLET_WALLETS_HPP
+#define CHRTEX_WALLET_WALLETS_HPP
+
+#include <wallet/kdf.hpp>
+
+namespace chratex {
+// The wallets set is all the wallets a node controls.  A node may contain multiple wallets independently encrypted and operated.
+class wallets {
+public:
+	wallets(bool &error, chratex::node &node);
+	~wallets();
+  chratex::kdf kdf;
+};
+}
+
+#endif

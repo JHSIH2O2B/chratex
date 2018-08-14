@@ -24,41 +24,31 @@
 
 #include <database/lmdb.hpp>
 #include <lib/numbers.hpp>
+#include <wallet/kdf.hpp>
 #include <config.hpp>
 #include <string>
 
 namespace chratex {
-namespace wallet {
 
-class kdf {
+class wallet_store {
 public:
-	void phs(
-    chratex::raw_key &result,
-    std::string const &password,
-    chratex::uint256_union const &salt
-  );
-	std::mutex mutex;
-};
-
-class store {
-public:
-  store(
+  wallet_store(
     bool & init, 
-    chratex::wallet::kdf & kdf, 
-    chratex::database::transaction & transaction, 
+    chratex::kdf &kdf, 
+    chratex::database::transaction &transaction, 
     chratex::account representative, 
     unsigned fanout,
     std::string const &wallet
   );
 
-  store(
+  wallet_store(
     bool & init, 
-    chratex::wallet::kdf & kdf,
-    chratex::database::transaction & transaction,
+    chratex::kdf &kdf,
+    chratex::database::transaction &transaction,
     chratex::account representative,
     unsigned fanout,
-    std::string const & wallet,
-    std::string const & json
+    std::string const &wallet,
+    std::string const &json
   );
 
   static unsigned constexpr kdf_full_work = 64 * 1024;
@@ -71,7 +61,6 @@ public:
 private:
 };
 
-}
 }
 
 #endif

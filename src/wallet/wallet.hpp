@@ -25,11 +25,9 @@
 #include <wallet/store.hpp>
 
 namespace chratex {
-
 class node;
-namespace wallet {
 
-class wallet: public std::enable_shared_from_this<wallet> {
+class wallet: public std::enable_shared_from_this<chratex::wallet> {
   public:
     wallet(
       bool &init_a, 
@@ -42,7 +40,7 @@ class wallet: public std::enable_shared_from_this<wallet> {
       bool &init, 
       chratex::database::transaction &transaction,
       chratex::node &node,
-      std::string const &wallet
+      std::string const &wallet,
       std::string const &json
     );
 
@@ -50,11 +48,10 @@ class wallet: public std::enable_shared_from_this<wallet> {
 
     std::function<void(bool, bool)> lock_observer;
 
-    chratex::wallet::store store;
+    chratex::wallet_store store;
 
     chratex::node &node;
 };
-}
 }
 
 #endif

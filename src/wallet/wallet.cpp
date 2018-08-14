@@ -20,37 +20,35 @@
 #include <wallet/wallet.hpp>
 #include <node/node.hpp>
 
-using namespace chratex::wallet;
-
-wallet::wallet(
-  bool &init_a, 
-  chratex::database::transaction &transaction_a,
-  chratex::node &node_a,
-  std::string const &wallet_a
+chratex::wallet::wallet(
+  bool &init, 
+  chratex::database::transaction &transaction,
+  chratex::node &node,
+  std::string const &wallet
 ) : 
   lock_observer([](bool, bool) {}),
   store (
-    init_a, node_a.wallets.kdf, transaction_a, 
-    node_a.config.random_representative(), 
-    node_a.config.password_fanout, wallet_a
+    init, node.wallets.kdf, transaction, 
+    node.config.random_representative(), 
+    node.config.password_fanout, wallet
   ),
-  node (node_a) {
+  node(node) {
 }
 
-wallet::wallet(
-  bool &init_a, 
-  chratex::database::transaction &transaction_a,
-  chratex::node &node_a,
-  std::string const &wallet_a
+chratex::wallet::wallet(
+  bool &init, 
+  chratex::database::transaction &transaction,
+  chratex::node &node,
+  std::string const &wallet,
   std::string const &json
 ) : 
   lock_observer([](bool, bool) {}),
   store(
-    init_a, node_a.wallets.kdf, transaction_a, 
-    node_a.config.random_representative(), 
-    node_a.config.password_fanout, wallet_a, json
+    init, node.wallets.kdf, transaction, 
+    node.config.random_representative(), 
+    node.config.password_fanout, wallet, json
   ),
-  node(node_a) {
+  node(node) {
 }
 
 
