@@ -37,7 +37,7 @@ public:
   void stop();
 
 private:
-  std::shared_ptr<chratex::net::server> server;
+  std::shared_ptr<chratex::net::server> net_server;
 
 };
 
