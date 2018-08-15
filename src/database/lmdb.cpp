@@ -64,11 +64,21 @@ mdb_val::mdb_val (
 }
 
 mdb_val::mdb_val(
-  MDB_val const & value_a, chratex::epoch epoch_a
-) : value (value_a), epoch (epoch_a) {
+  MDB_val const &value, chratex::epoch epoch_a
+) : value(value), epoch(epoch) {
 }
 
-mdb_val::mdb_val(size_t size_a, void * data_a) : value ({ size_a, data_a }) {
+mdb_val::mdb_val(size_t size, void *data) : value ({ size, data }) {
+}
+
+chratex::database::mdb_val::mdb_val(
+  chratex::uint128_union const & val
+) : mdb_val(sizeof(val), const_cast<chratex::uint128_union *>(&val)) {
+}
+
+chratex::database::mdb_val::mdb_val(
+  chratex::uint256_union const &val
+) : mdb_val(sizeof(val), const_cast<chratex::uint256_union *>(&val)) {
 }
 
 void * mdb_val::data() const {
@@ -91,7 +101,7 @@ mdb_val::operator MDB_val const &() const {
 
 transaction::transaction(
   mdb_env & environment_a, MDB_txn * parent_a, bool write
-) : environment (environment_a) {
+) : environment(environment_a) {
 	auto status(
     mdb_txn_begin(environment_a, parent_a, write ? 0 : MDB_RDONLY, &handle)
   );
@@ -105,5 +115,9 @@ transaction::~transaction () {
 
 transaction::operator MDB_txn *() const {
 	return handle;
+}
+
+mdb_env &transaction::get_environment() {
+  return environment;
 }
 

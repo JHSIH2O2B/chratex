@@ -23,6 +23,8 @@
 #define CHRATEX_DATABASE_LMDB_HPP
 
 #include <common.hpp>
+#include <lib/numbers.hpp>
+
 #include <boost/filesystem.hpp>
 #include <liblmdb/lmdb.h>
 
@@ -40,26 +42,49 @@ namespace database {
 
   class mdb_val {
     public:
+
       mdb_val(chratex::epoch = chratex::epoch::unspecified);
+
       mdb_val(MDB_val const &, chratex::epoch = chratex::epoch::unspecified);
+
       mdb_val(size_t, void *);
+
+      mdb_val (chratex::uint128_union const &);
+
+      mdb_val (chratex::uint256_union const &);
+
       void *data() const;
+
       size_t size() const;
+
       operator MDB_val *() const;
+
       operator MDB_val const &() const;
+
       MDB_val value;
+
       std::shared_ptr<std::vector<uint8_t>> buffer;
+
       chratex::epoch epoch;
   };
 
   class transaction {
     public:
+
       transaction(chratex::database::mdb_env &, MDB_txn *, bool);
+
       ~transaction();
+
       operator MDB_txn *() const;
+
+      mdb_env &get_environment();
+
     private:
+
       MDB_txn *handle;
+
       mdb_env &environment;
+
   };
 }
 }
