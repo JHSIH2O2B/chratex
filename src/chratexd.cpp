@@ -18,8 +18,14 @@
  */
 
 #include <iostream>
+#include <rpc/server.hpp>
 
 int main(int argc, char *argv[]) {
   std::cout << "Hello chratos world" << std::endl;
+
+  auto server = std::make_shared<chratex::rpc::server>();
+
+  server->start();
+
   return 0;
 }

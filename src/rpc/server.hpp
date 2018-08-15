@@ -23,6 +23,9 @@
 #define CHRATEX_RPC_SERVER_HPP
 
 #include <net/server.hpp>
+#include <net/session.hpp>
+
+#include <memory>
 
 namespace chratex {
 namespace rpc {
@@ -37,7 +40,12 @@ public:
   void stop();
 
 private:
+
   std::shared_ptr<chratex::net::server> net_server;
+
+  void on_connect(std::shared_ptr<net::session>);
+  
+  void on_message(std::shared_ptr<net::session>, const std::string &);
 
 };
 

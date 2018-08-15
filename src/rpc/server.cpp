@@ -20,19 +20,44 @@
 #include <rpc/server.hpp>
 
 namespace chratex {
-namespace rpc {
 
-server::server() {
+rpc::server::server() {
+  net_server = std::make_shared<net::server>(9555);
+}
+
+void rpc::server::start() {
+  net_server->on_connect(
+    std::bind(&rpc::server::on_connect,
+    this,
+    std::placeholders::_1)
+  );
+
+  net_server->start();
+}
+
+void rpc::server::stop() {
 
 }
 
-void server::start() {
+void rpc::server::on_connect(std::shared_ptr<net::session> session) {
+  session->on_receive(
+    std::bind(
+      &rpc::server::on_message,
+      this,
+      std::placeholders::_1,
+      std::placeholders::_2
+    )
+  );
 
+  session->write("Connected to Chratex.\n");
 }
 
-void server::stop() {
+void rpc::server::on_message(
+  std::shared_ptr<net::session> session,
+  const std::string &message
+) {
 
+  session->write("chratex echo: " + message + "\n");
 }
 
-}
 }
