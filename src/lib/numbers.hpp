@@ -64,33 +64,65 @@ public:
 // Balances are 128 bit.
 using amount = uint128_union;
 class raw_key;
+
 union uint256_union {
+
 	uint256_union() = default;
+
 	uint256_union(std::string const &);
+
 	uint256_union(uint64_t);
+
 	uint256_union(chratex::uint256_t const &);
-	void encrypt(chratex::raw_key const &, chratex::raw_key const &, uint128_union const &);
+
+	void encrypt(
+    chratex::raw_key const &, 
+    chratex::raw_key const &, 
+    uint128_union const &
+  );
+
 	uint256_union & operator^=(chratex::uint256_union const &);
+
 	uint256_union operator^(chratex::uint256_union const &) const;
+  
 	bool operator==(chratex::uint256_union const &) const;
+
 	bool operator!=(chratex::uint256_union const &) const;
+
 	bool operator<(chratex::uint256_union const &) const;
+
 	void encode_hex(std::string &) const;
+
 	bool decode_hex(std::string const &);
+
 	void encode_dec(std::string &) const;
+
 	bool decode_dec(std::string const &);
+
 	void encode_account(std::string &) const;
+
 	std::string to_account() const;
+
 	std::string to_account_split() const;
+
 	bool decode_account(std::string const &);
+
 	std::array<uint8_t, 32> bytes;
+
 	std::array<char, 32> chars;
+
 	std::array<uint32_t, 8> dwords;
+
 	std::array<uint64_t, 4> qwords;
+
 	std::array<uint128_union, 2> owords;
+
 	void clear();
+
 	bool is_zero() const;
+
 	std::string to_string() const;
+
 	chratex::uint256_t number() const;
 };
 // All keys and hashes are 256 bit.

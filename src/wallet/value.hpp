@@ -22,15 +22,23 @@
 #ifndef CHRATEX_WALLET_VALUE_HPP
 #define CHRATEX_WALLET_VALUE_HPP
 
+#include <database/lmdb.hpp>
+
 namespace chratex {
 
 class wallet_value {
 public:
+
 	wallet_value() = default;
+
 	wallet_value(database::mdb_val const &);
+
 	wallet_value(chratex::uint256_union const &, uint64_t);
+
 	database::mdb_val val() const;
+
 	chratex::private_key key;
+
 	uint64_t work;
 };
 

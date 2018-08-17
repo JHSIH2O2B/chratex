@@ -18,6 +18,9 @@
  */
 
 #include <wallet/kdf.hpp>
+#include <wallet/store.hpp>
+
+#include <argon2.h>
 
 void chratex::kdf::phs(
   chratex::raw_key &result,

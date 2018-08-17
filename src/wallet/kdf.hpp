@@ -22,6 +22,8 @@
 #ifndef CHRATEX_WALLET_KDF_HPP
 #define CHRATEX_WALLET_KDF_HPP
 
+#include <lib/numbers.hpp>
+
 namespace chratex {
 
 class kdf {

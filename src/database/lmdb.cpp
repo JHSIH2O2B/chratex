@@ -121,3 +121,25 @@ mdb_env &transaction::get_environment() {
   return environment;
 }
 
+mdb_val::operator chratex::uint128_union() const {
+	chratex::uint128_union result;
+	assert(size() == sizeof(result));
+	std::copy(
+    reinterpret_cast<uint8_t const *>(data()),
+    reinterpret_cast<uint8_t const *>(data()) + sizeof(result),
+    result.bytes.data()
+  );
+	return result;
+}
+
+mdb_val::operator chratex::uint256_union() const {
+	chratex::uint256_union result;
+	assert(size() == sizeof(result));
+	std::copy(
+    reinterpret_cast<uint8_t const *>(data()),
+    reinterpret_cast<uint8_t const *>(data()) + sizeof(result),
+    result.bytes.data()
+  );
+	return result;
+}
+

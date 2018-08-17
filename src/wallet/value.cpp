@@ -19,7 +19,7 @@
 
 #include <wallet/value.hpp>
 
-chratex::wallet_value::wallet_value(chratex::mdb_val const &val) {
+chratex::wallet_value::wallet_value(database::mdb_val const &val) {
 	assert(val.size () == sizeof (*this));
 
 	std::copy(
@@ -30,21 +30,21 @@ chratex::wallet_value::wallet_value(chratex::mdb_val const &val) {
 	std::copy(
     reinterpret_cast<uint8_t const *>(val.data()) + sizeof(key),
     reinterpret_cast<uint8_t const *>(val.data()) + sizeof(key) + sizeof(work),
-    reinterpret_cast<char *> (&work)
+    reinterpret_cast<char *>(&work)
   );
 }
 
 chratex::wallet_value::wallet_value(
   chratex::uint256_union const & key,
   uint64_t work
-) : key (key_a), work (work_a) {
+) : key (key), work (work) {
 }
 
-chratex::mdb_val chratex::wallet_value::val() const {
+chratex::database::mdb_val chratex::wallet_value::val() const {
 	static_assert(
     sizeof(*this) == sizeof(key) + sizeof(work), "Class not packed"
   );
-	return chratex::mdb_val(
+	return chratex::database::mdb_val(
     sizeof(*this), const_cast<chratex::wallet_value *>(this)
   );
 }

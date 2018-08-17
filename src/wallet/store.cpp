@@ -27,6 +27,26 @@
 #include <boost/property_tree/json_parser.hpp>
 #include <boost/property_tree/ptree.hpp>
 
+unsigned const chratex::wallet_store::version_1(1);
+unsigned const chratex::wallet_store::version_current(version_1);
+
+// Wallet version number
+chratex::uint256_union const chratex::wallet_store::version_special(0);
+// Random number used to salt private key encryption
+chratex::uint256_union const chratex::wallet_store::salt_special(1);
+// Key used to encrypt wallet keys, encrypted itself by the user password
+chratex::uint256_union const chratex::wallet_store::wallet_key_special(2);
+// Check value used to see if password is valid
+chratex::uint256_union const chratex::wallet_store::check_special(3);
+// Representative account to be used if we open a new account
+chratex::uint256_union const chratex::wallet_store::representative_special(4);
+// Wallet seed for deterministic key generation
+chratex::uint256_union const chratex::wallet_store::seed_special(5);
+// Current key index for deterministic keys
+chratex::uint256_union const 
+  chratex::wallet_store::deterministic_index_special(6);
+int const chratex::wallet_store::special_count(7);
+
 chratex::wallet_store::wallet_store(
   bool &init, 
   chratex::kdf &kdf, 
@@ -188,6 +208,33 @@ chratex::wallet_store::wallet_store(
   }
 }
 
+void chratex::wallet_store::initialize(
+  MDB_txn *transaction, bool &init, std::string const &path
+) {
+	assert(strlen(path.c_str()) == path.size());
+	auto error(0);
+	error |= mdb_dbi_open(transaction, path.c_str(), MDB_CREATE, &handle);
+	init = error != 0;
+}
+
+chratex::uint256_union chratex::wallet_store::check(MDB_txn *transaction) {
+  chratex::wallet_value value(
+    entry_get_raw(transaction, chratex::wallet_store::check_special)
+  );
+	return value.key;
+}
+
+bool chratex::wallet_store::valid_password(MDB_txn *transaction) {
+	chratex::raw_key zero;
+	zero.data.clear();
+	chratex::raw_key wallet_key_l;
+	wallet_key(wallet_key_l, transaction);
+	chratex::uint256_union check_l;
+	check_l.encrypt(zero, wallet_key_l, salt(transaction).owords[0]);
+	bool ok = check(transaction) == check_l;
+	return ok;
+}
+
 void chratex::wallet_store::wallet_key(
   chratex::raw_key &prv, MDB_txn *transaction
 ) {
@@ -199,13 +246,13 @@ void chratex::wallet_store::wallet_key(
 	prv.decrypt(wallet.data, password, salt(transaction).owords[0]);
 }
 
-void chratex::wallet_store::initialize(
-  MDB_txn *transaction, bool &init, std::string const &path
-) {
-	assert(strlen(path.c_str()) == path.size());
-	auto error(0);
-	error |= mdb_dbi_open(transaction, path.c_str(), MDB_CREATE, &handle);
-	init = error != 0;
+void chratex::wallet_store::seed(chratex::raw_key &prv, MDB_txn *transaction) {
+	chratex::wallet_value value(
+    entry_get_raw(transaction, chratex::wallet_store::seed_special)
+  );
+	chratex::raw_key password;
+	wallet_key(password, transaction);
+	prv.decrypt(value.key, password, salt(transaction).owords[0]);
 }
 
 void chratex::wallet_store::seed_set(
@@ -243,8 +290,17 @@ chratex::key_type chratex::wallet_store::key_type(
 	return result;
 }
 
+void chratex::wallet_store::deterministic_key(
+  chratex::raw_key & prv, MDB_txn * transaction, uint32_t index
+) {
+	assert(valid_password(transaction));
+	chratex::raw_key seed_l;
+	seed(seed_l, transaction);
+	chratex::deterministic_key(seed_l.data, index, prv.data);
+}
+
 void chratex::wallet_store::deterministic_index_set(
-  MDB_txn * transaction, uint32_t index
+  MDB_txn *transaction, uint32_t index
 ) {
 	chratex::uint256_union idx(index);
 	chratex::wallet_value value(idx, 0);
@@ -254,7 +310,8 @@ void chratex::wallet_store::deterministic_index_set(
 }
 
 void chratex::wallet_store::deterministic_clear(MDB_txn * transaction) {
-	chratex::uint256_union key (0);
+	chratex::uint256_union key(0);
+
 	for (auto i(begin(transaction)), n(end()); i != n;) {
 		switch (key_type(chratex::wallet_value(i->second))) {
 			case chratex::key_type::deterministic: {
@@ -272,12 +329,37 @@ void chratex::wallet_store::deterministic_clear(MDB_txn * transaction) {
 	deterministic_index_set(transaction, 0);
 }
 
-
 chratex::uint256_union chratex::wallet_store::salt(MDB_txn * transaction) {
 	chratex::wallet_value value(
     entry_get_raw(transaction, chratex::wallet_store::salt_special)
   );
 	return value.key;
+}
+
+void chratex::wallet_store::erase(
+  MDB_txn *transaction_a, chratex::public_key const &pub
+) {
+	auto status(
+    mdb_del(transaction_a, handle, chratex::database::mdb_val(pub), nullptr)
+  );
+	assert(status == 0);
+}
+
+chratex::wallet_value chratex::wallet_store::entry_get_raw(
+  MDB_txn *transaction_a, chratex::public_key const &pub_a
+) {
+	chratex::wallet_value result;
+  chratex::database::mdb_val value;
+	auto status(
+    mdb_get(transaction_a, handle, chratex::database::mdb_val(pub_a), value)
+  );
+	if (status == 0) {
+		result = chratex::wallet_value(value);
+	} else {
+		result.key.clear();
+		result.work = 0;
+	}
+	return result;
 }
 
 void chratex::wallet_store::entry_put_raw(
@@ -288,6 +370,63 @@ void chratex::wallet_store::entry_put_raw(
 	auto status(
     mdb_put(transaction, handle, database::mdb_val(pub), entry.val(), 0)
   );
+	assert(status == 0);
+}
+
+bool chratex::wallet_store::fetch(
+  MDB_txn *transaction, chratex::public_key const &pub, chratex::raw_key &prv
+) {
+	auto result = false;
+	if (valid_password (transaction)) {
+		chratex::wallet_value value (entry_get_raw (transaction, pub));
+		if (!value.key.is_zero ()) {
+			switch (key_type (value)) {
+				case chratex::key_type::deterministic: {
+					chratex::raw_key seed_l;
+					seed(seed_l, transaction);
+					uint32_t index(
+            static_cast<uint32_t>(
+              value.key.number() &static_cast<uint32_t>(-1)
+            )
+          );
+					deterministic_key(prv, transaction, index);
+					break;
+				}
+				case chratex::key_type::adhoc: {
+					// Ad-hoc keys
+					chratex::raw_key password_l;
+					wallet_key(password_l, transaction);
+					prv.decrypt(value.key, password_l, salt (transaction).owords[0]);
+					break;
+				}
+				default: {
+					result = true;
+					break;
+				}
+			}
+		} else {
+			result = true;
+		}
+	} else {
+		result = true;
+	}
+	if (!result) {
+		chratex::public_key compare(chratex::pub_key(prv.data));
+		if (!(pub == compare)) {
+			result = true;
+		}
+	}
+	return result;
+}
+
+bool chratex::wallet_store::exists(
+  MDB_txn *transaction, chratex::public_key const &pub
+) {
+	return !pub.is_zero() && find(transaction, pub) != end();
+}
+
+void chratex::wallet_store::destroy(MDB_txn *transaction) {
+	auto status(mdb_drop(transaction, handle, 1));
 	assert(status == 0);
 }
 
@@ -303,7 +442,7 @@ void chratex::wallet_store::version_put(
 
 chratex::store_iterator chratex::wallet_store::begin(MDB_txn *transaction) {
 	chratex::store_iterator result(
-    std::make_unique<chratex::store_iterator_impl>(
+    std::make_unique<chratex::mdb_iterator>(
       transaction, 
       handle,
       chratex::database::mdb_val(
@@ -318,8 +457,8 @@ chratex::store_iterator chratex::wallet_store::begin(
   MDB_txn *transaction, chratex::uint256_union const & key
 ) {
 	chratex::store_iterator result(
-    std::make_unique<chratex::store_iterator_impl>(
-      transaction, handle, chratex::mdb_val(key)
+    std::make_unique<chratex::mdb_iterator>(
+      transaction, handle, database::mdb_val(key)
     )
   );
 	return result;

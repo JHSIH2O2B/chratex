@@ -8,6 +8,8 @@ include_directories("lmdb/libraries")
 include_directories("phc-winner-argon2/include")
 include_directories(".")
 
+option(RAIBLOCKS_SIMD_OPTIMIZATIONS "Enable CPU-specific SIMD optimizations (SSE/AVX or NEON, e.g.)" OFF)
+
 if (WIN32)
 	add_definitions(-D_WIN32_WINNT=0x0600
 					-DWINVER=0x0600
@@ -51,7 +53,7 @@ endif (WIN32)
 set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
 
-find_package (Boost
+find_package (Boost 1.67.0
   REQUIRED COMPONENTS 
   filesystem system thread program_options
 )
@@ -110,50 +112,61 @@ file(GLOB net_files "${CMAKE_SOURCE_DIR}/src/net/*.cpp")
 file(GLOB database_files "${CMAKE_SOURCE_DIR}/src/database/*.cpp")
 file(GLOB lib_files "${CMAKE_SOURCE_DIR}/src/lib/*.cpp")
 file(GLOB node_files "${CMAKE_SOURCE_DIR}/src/node/*.cpp")
+file(GLOB wallet_files "${CMAKE_SOURCE_DIR}/src/wallet/*.cpp")
+
 file(GLOB test_files "${CMAKE_SOURCE_DIR}/test/*.cpp")
+file(GLOB wallet_test_files "${CMAKE_SOURCE_DIR}/test/wallet/*.cpp")
 
 set(CMAKE_CXX_FLAGS "-Wall")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-add_library (cryptopp
-  cryptopp/algparam.cpp
-  cryptopp/asn.cpp
-  cryptopp/basecode.cpp
-  cryptopp/cpu.cpp
-  cryptopp/cryptlib.cpp
-  cryptopp/default.cpp
-  cryptopp/des.cpp
-  cryptopp/dessp.cpp
-  cryptopp/dll.cpp
-  cryptopp/ec2n.cpp
-  cryptopp/ecp.cpp
-  cryptopp/filters.cpp
-  cryptopp/fips140.cpp
-  cryptopp/gcm.cpp
-  cryptopp/gf2n.cpp
-  cryptopp/gfpcrypt.cpp
-  cryptopp/hex.cpp
-  cryptopp/hmac.cpp
-  cryptopp/hrtimer.cpp
-  cryptopp/integer.cpp
-  cryptopp/iterhash.cpp
-  cryptopp/misc.cpp
-  cryptopp/modes.cpp
-  cryptopp/mqueue.cpp
-  cryptopp/nbtheory.cpp
-  cryptopp/oaep.cpp
-  cryptopp/osrng.cpp
-  cryptopp/pubkey.cpp
-  cryptopp/queue.cpp
-  cryptopp/randpool.cpp
-  cryptopp/rdtables.cpp
-  cryptopp/rijndael.cpp
-  cryptopp/rng.cpp
-  cryptopp/sha.cpp
-  cryptopp/simple.cpp
-  cryptopp/winpipes.cpp
-)
+set (BUILD_SHARED OFF CACHE BOOL "")
+set (BUILD_TESTING OFF CACHE BOOL "")
+set (USE_INTERMEDIATE_OBJECTS_TARGET OFF CACHE BOOL "")
+if (CRYPTOPP_CUSTOM OR NOT RAIBLOCKS_SIMD_OPTIMIZATIONS)
+	set (CRYPTOPP_LIBRARY cryptopp)
+	add_library (cryptopp
+		cryptopp/algparam.cpp
+		cryptopp/asn.cpp
+		cryptopp/basecode.cpp
+		cryptopp/cpu.cpp
+		cryptopp/cryptlib.cpp
+		cryptopp/default.cpp
+		cryptopp/des.cpp
+		cryptopp/dessp.cpp
+		cryptopp/dll.cpp
+		cryptopp/ec2n.cpp
+		cryptopp/ecp.cpp
+		cryptopp/filters.cpp
+		cryptopp/fips140.cpp
+		cryptopp/gcm.cpp
+		cryptopp/gf2n.cpp
+		cryptopp/gfpcrypt.cpp
+		cryptopp/hex.cpp
+		cryptopp/hmac.cpp
+		cryptopp/hrtimer.cpp
+		cryptopp/integer.cpp
+		cryptopp/iterhash.cpp
+		cryptopp/misc.cpp
+		cryptopp/modes.cpp
+		cryptopp/mqueue.cpp
+		cryptopp/nbtheory.cpp
+		cryptopp/oaep.cpp
+		cryptopp/osrng.cpp
+		cryptopp/pubkey.cpp
+		cryptopp/queue.cpp
+		cryptopp/randpool.cpp
+		cryptopp/rdtables.cpp
+		cryptopp/rijndael.cpp
+		cryptopp/rng.cpp
+		cryptopp/sha.cpp
+		cryptopp/simple.cpp
+		cryptopp/winpipes.cpp)
+else ()
+	set (CRYPTOPP_LIBRARY cryptopp-static)
+	add_subdirectory (cryptopp)
+endif ()
 
 if (CMAKE_SYSTEM_PROCESSOR STREQUAL "x86_64")
 	set (ARGON_CORE phc-winner-argon2/src/opt.c)
@@ -189,6 +202,7 @@ add_library(libchratex
   ${utility_files}
   ${database_files}
   ${lib_files}
+  ${wallet_files}
   ${WORKING_DIR}
 )
 
@@ -198,21 +212,35 @@ add_executable(chratexd
 
 add_executable(chratex_test
   ${test_files}
+  ${wallet_test_files}
+)
+
+target_link_libraries(libchratex
+  ed25519
+  ${CRYPTOPP_LIBRARY}
 )
 
 target_link_libraries(chratexd
   libbitcoin
+  ed25519
   libchratex
   lmdb
-  cryptopp
   blake2
   ${Boost_LIBRARIES}
   ${PLATFORM_LINK_FLAGS}
+  ${CRYPTOPP_LIBRARY}
 )
 
 target_link_libraries(chratex_test 
   gtest_main
+  ed25519
+  lmdb
+  blake2
+  libbitcoin
   ${Boost_LIBRARIES}
+  ${PLATFORM_LINK_FLAGS}
+  ${CRYPTOPP_LIBRARY}
+  libchratex
 )
 
 target_compile_definitions(libbitcoin
@@ -222,10 +250,15 @@ target_compile_definitions(libbitcoin
 
 target_compile_definitions(libchratex
 	PUBLIC
-		-DACTIVE_NETWORK=${ACTIVE_NETWORK}
+	  -DACTIVE_NETWORK=${ACTIVE_NETWORK}
 )
 
 target_compile_definitions(chratexd
+	PUBLIC
+		-DACTIVE_NETWORK=${ACTIVE_NETWORK}
+)
+
+target_compile_definitions(chratex_test
 	PUBLIC
 		-DACTIVE_NETWORK=${ACTIVE_NETWORK}
 )

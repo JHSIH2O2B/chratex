@@ -25,9 +25,12 @@
 #include <database/lmdb.hpp>
 #include <database/store_iterator.hpp>
 #include <lib/numbers.hpp>
+
 #include <wallet/kdf.hpp>
 #include <wallet/fan.hpp>
 #include <wallet/value.hpp>
+#include <wallet/key_type.hpp>
+
 #include <config.hpp>
 #include <string>
 
@@ -56,11 +59,19 @@ public:
 
   void initialize(MDB_txn *transaction, bool &init, std::string const &path);
 
+  chratex::uint256_union check(MDB_txn *transaction);
+
+  bool valid_password(MDB_txn *transaction);
+
   void wallet_key(chratex::raw_key &, MDB_txn *);
+
+  void seed(chratex::raw_key &, MDB_txn *);
 
   void seed_set(MDB_txn *, chratex::raw_key const &);
 
-  chratex::key_type key_type(rai::wallet_value const &);
+  chratex::key_type key_type(chratex::wallet_value const &);
+
+  void deterministic_key(chratex::raw_key &, MDB_txn *, uint32_t);
 
   void deterministic_index_set (MDB_txn *, uint32_t);
 
@@ -74,10 +85,18 @@ public:
   );
 
   void entry_put_raw(
-    MDB_txn *transaction,
-    chratex::public_key const &pub,
-    chratex::wallet_value const &entry
+    MDB_txn *,
+    chratex::public_key const &,
+    chratex::wallet_value const &
   );
+
+  bool fetch(MDB_txn *, chratex::public_key const &, chratex::raw_key &);
+
+  bool exists(MDB_txn *, chratex::public_key const &);
+
+	void destroy(MDB_txn *);
+
+  void erase(MDB_txn *, chratex::public_key const &);
 
   chratex::store_iterator find(MDB_txn *, chratex::uint256_union const &);
 

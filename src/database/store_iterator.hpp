@@ -28,54 +28,50 @@ namespace chratex {
 
 class store_iterator_impl {
 public:
-	store_iterator_impl(
-    MDB_txn *transaction, 
-    MDB_dbi db,
-    chratex::epoch = chratex::epoch::unspecified
-  );
-	store_iterator_impl(
-    std::nullptr_t,
-    chratex::epoch = chratex::epoch::unspecified
-  );
-	store_iterator_impl(
-    MDB_txn * transaction,
-    MDB_dbi db,
-    MDB_val const &val,
-    chratex::epoch = chratex::epoch::unspecified
-  );
-	store_iterator_impl(
-    chratex::store_iterator_impl &&other
-  );
-	store_iterator_impl(
+	virtual ~store_iterator_impl () = default;
+	virtual chratex::store_iterator_impl & operator++ () = 0;
+	virtual std::pair<database::mdb_val, database::mdb_val> * operator-> () = 0;
+	virtual bool operator==(chratex::store_iterator_impl const &other) const = 0;
+	virtual void next_dup() = 0;
+	virtual bool is_end_sentinal() const = 0;
+	chratex::store_iterator_impl &operator=(
     chratex::store_iterator_impl const &
   ) = delete;
-	~store_iterator_impl();
-	chratex::store_iterator_impl & operator++();
-	chratex::store_iterator_impl & operator=(
-    chratex::store_iterator_impl && other
-  );
-	chratex::store_iterator_impl & operator=(
-    chratex::store_iterator_impl const &
-  ) = delete;
-	std::pair<database::mdb_val, database::mdb_val> *operator->();
 	bool operator==(chratex::store_iterator_impl const * other_a) const;
-	bool operator==(chratex::store_iterator_impl const & other_a) const;
 	bool operator!=(chratex::store_iterator_impl const & other_a) const;
-	void next_dup();
-	void clear();
-	bool is_end_sentinal() const;
-	MDB_cursor *cursor;
-	std::pair<database::mdb_val, database::mdb_val> current;
 };
 
-class store_iterator {
+class mdb_iterator : public store_iterator_impl
+{
 public:
-	store_iterator (std::nullptr_t);
-	store_iterator (std::unique_ptr<chratex::store_iterator_impl>);
-	store_iterator (chratex::store_iterator &&);
-	chratex::store_iterator & operator++ ();
-	chratex::store_iterator & operator= (chratex::store_iterator &&);
-	chratex::store_iterator & operator= (chratex::store_iterator const &) = delete;
+	mdb_iterator (MDB_txn * transaction_a, MDB_dbi db_a, chratex::epoch = chratex::epoch::unspecified);
+	mdb_iterator (std::nullptr_t, chratex::epoch = chratex::epoch::unspecified);
+	mdb_iterator (MDB_txn * transaction_a, MDB_dbi db_a, MDB_val const & val_a, chratex::epoch = chratex::epoch::unspecified);
+	mdb_iterator (chratex::mdb_iterator && other_a);
+	mdb_iterator (chratex::mdb_iterator const &) = delete;
+	~mdb_iterator ();
+	chratex::store_iterator_impl & operator++ () override;
+	std::pair<database::mdb_val, database::mdb_val> * operator-> () override;
+	bool operator== (chratex::store_iterator_impl const & other_a) const override;
+	void next_dup () override;
+	bool is_end_sentinal () const override;
+	void clear ();
+	chratex::mdb_iterator & operator= (chratex::mdb_iterator && other_a);
+	chratex::store_iterator_impl & operator= (chratex::store_iterator_impl const &) = delete;
+	MDB_cursor * cursor;
+	std::pair<database::mdb_val, database::mdb_val> current;
+};
+class mdb_merge_iterator;
+
+class store_iterator {
+  friend class chratex::mdb_merge_iterator;
+public:
+	store_iterator(std::nullptr_t);
+	store_iterator(std::unique_ptr<chratex::store_iterator_impl>);
+	store_iterator(chratex::store_iterator &&);
+	chratex::store_iterator &operator++ ();
+	chratex::store_iterator &operator= (chratex::store_iterator &&);
+	chratex::store_iterator &operator= (chratex::store_iterator const &) = delete;
 	std::pair<database::mdb_val, database::mdb_val> * operator-> ();
 	bool operator== (chratex::store_iterator const &) const;
 	bool operator!= (chratex::store_iterator const &) const;

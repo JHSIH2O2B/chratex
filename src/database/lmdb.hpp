@@ -22,7 +22,7 @@
 #ifndef CHRATEX_DATABASE_LMDB_HPP
 #define CHRATEX_DATABASE_LMDB_HPP
 
-#include <common.hpp>
+#include <lib/common.hpp>
 #include <lib/numbers.hpp>
 
 #include <boost/filesystem.hpp>
@@ -56,6 +56,10 @@ namespace database {
       void *data() const;
 
       size_t size() const;
+
+      explicit operator chratex::uint128_union() const;
+
+      explicit operator chratex::uint256_union() const;
 
       operator MDB_val *() const;
 
