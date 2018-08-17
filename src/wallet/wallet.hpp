@@ -22,36 +22,15 @@
 #ifndef CHRATEX_WALLET_WALLET_HPP
 #define CHRATEX_WALLET_WALLET_HPP
 
-#include <wallet/store.hpp>
-
 namespace chratex {
-class node;
 
-class wallet: public std::enable_shared_from_this<chratex::wallet> {
+class wallet {
   public:
-    wallet(
-      bool &init_a, 
-      chratex::database::transaction &transaction,
-      chratex::node &node,
-      std::string const &wallet
-    );
-
-    wallet(
-      bool &init, 
-      chratex::database::transaction &transaction,
-      chratex::node &node,
-      std::string const &wallet,
-      std::string const &json
-    );
+    wallet();
 
   private:
-
-    std::function<void(bool, bool)> lock_observer;
-
-    chratex::wallet_store store;
-
-    chratex::node &node;
 };
+
 }
 
 #endif

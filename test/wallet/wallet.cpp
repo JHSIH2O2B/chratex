@@ -17,16 +17,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <gtest/gtest.h>
 #include <wallet/wallet.hpp>
-#include <utility/random_entropy.hpp>
-#include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 
-chratex::wallet::wallet() {
-  auto chunk(chratex::create_cs_random());
-  auto mnemonic(libbitcoin::wallet::create_mnemonic(chunk));
-
-  for (auto &it : mnemonic) {
-    std::cout << it << " ";
-  }
-  std::cout << std::endl;
+TEST(wallet, creating_new_wallet) {
+  auto wallet = chratex::wallet();
 }

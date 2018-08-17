@@ -29,8 +29,6 @@
 #include <liblmdb/lmdb.h>
 
 namespace chratex {
-namespace database {
-
   class mdb_env {
     public: 
       mdb_env(bool &, boost::filesystem::path const &, int max_dbs = 128);
@@ -75,7 +73,7 @@ namespace database {
   class transaction {
     public:
 
-      transaction(chratex::database::mdb_env &, MDB_txn *, bool);
+      transaction(chratex::mdb_env &, MDB_txn *, bool);
 
       ~transaction();
 
@@ -90,7 +88,6 @@ namespace database {
       mdb_env &environment;
 
   };
-}
 }
 
 #endif

@@ -55,7 +55,7 @@ set(CMAKE_C_STANDARD 11)
 
 find_package (Boost 1.67.0
   REQUIRED COMPONENTS 
-  filesystem system thread program_options
+  filesystem system thread program_options random regex
 )
 include_directories (${Boost_INCLUDE_DIR})
 
@@ -215,37 +215,22 @@ add_executable(chratex_test
   ${wallet_test_files}
 )
 
-target_link_libraries(libchratex
-  ed25519
-  ${CRYPTOPP_LIBRARY}
-)
-
 target_link_libraries(chratexd
-  libbitcoin
+  libbitcoin 
   ed25519
   libchratex
-  lmdb
-  blake2
   ${Boost_LIBRARIES}
   ${PLATFORM_LINK_FLAGS}
   ${CRYPTOPP_LIBRARY}
 )
 
 target_link_libraries(chratex_test 
+  libbitcoin 
   gtest_main
-  ed25519
-  lmdb
-  blake2
-  libbitcoin
+  libchratex
   ${Boost_LIBRARIES}
   ${PLATFORM_LINK_FLAGS}
   ${CRYPTOPP_LIBRARY}
-  libchratex
-)
-
-target_compile_definitions(libbitcoin
-	PUBLIC
-		-DACTIVE_NETWORK=${ACTIVE_NETWORK}
 )
 
 target_compile_definitions(libchratex

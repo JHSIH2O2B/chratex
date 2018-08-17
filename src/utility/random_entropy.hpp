@@ -25,9 +25,7 @@
 #include <bitcoin/bitcoin/utility/data.hpp>
 
 namespace chratex {
-  namespace entropy {
-    libbitcoin::data_chunk create_cs_random();
-  }
+  libbitcoin::data_chunk create_cs_random();
 }
 
 #endif

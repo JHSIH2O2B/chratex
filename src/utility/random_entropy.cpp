@@ -21,23 +21,17 @@
 #include <boost/random/random_device.hpp>
 #include <random>
 
-namespace chratex {
-namespace entropy {
-
-  libbitcoin::data_chunk create_cs_random() {
-    auto slice = libbitcoin::data_chunk(32u);
-    boost::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<> distribution(
+libbitcoin::data_chunk chratex::create_cs_random() {
+  auto slice = libbitcoin::data_chunk(32u);
+  boost::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_int_distribution<> distribution(
       0, std::numeric_limits<uint8_t>::max()
-    );
-    const auto fill = [&distribution, &gen](uint8_t) {
-      return static_cast<uint8_t>(distribution(gen));
-    };
+      );
+  const auto fill = [&distribution, &gen](uint8_t) {
+    return static_cast<uint8_t>(distribution(gen));
+  };
 
-    std::transform(slice.begin(), slice.end(), slice.begin(), fill);
-    return slice;
-  }
-
-}
+  std::transform(slice.begin(), slice.end(), slice.begin(), fill);
+  return slice;
 }
