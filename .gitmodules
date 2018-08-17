@@ -7,3 +7,6 @@
 [submodule "phc-winner-argon2"]
 	path = phc-winner-argon2
 	url = https://github.com/clemahieu/phc-winner-argon2.git
+[submodule "miniupnp"]
+	path = miniupnp
+	url = https://github.com/miniupnp/miniupnp.git

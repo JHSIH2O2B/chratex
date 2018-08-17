@@ -98,13 +98,19 @@ public:
 
   void erase(MDB_txn *, chratex::public_key const &);
 
-  chratex::store_iterator find(MDB_txn *, chratex::uint256_union const &);
+  chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> find(
+    MDB_txn *, chratex::uint256_union const &
+  );
 
-	chratex::store_iterator begin(MDB_txn *, chratex::uint256_union const &);
+	chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> begin(
+    MDB_txn *, chratex::uint256_union const &
+  );
 
-	chratex::store_iterator begin(MDB_txn *);
+	chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> begin(
+    MDB_txn *
+  );
 
-	chratex::store_iterator end();
+	chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> end();
 
   void version_put (MDB_txn *, unsigned);
 

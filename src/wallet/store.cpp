@@ -440,35 +440,49 @@ void chratex::wallet_store::version_put(
   );
 }
 
-chratex::store_iterator chratex::wallet_store::begin(MDB_txn *transaction) {
-	chratex::store_iterator result(
-    std::make_unique<chratex::mdb_iterator>(
+chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> chratex::wallet_store::begin(MDB_txn *transaction_a) {
+  chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> result (std::make_unique<chratex::mdb_iterator<chratex::uint256_union, chratex::wallet_value>> (transaction_a, handle, chratex::database::mdb_val (chratex::uint256_union (special_count))));
+
+  /*
+	chratex::store_iterator<
+    chratex::uint256_union, chratex::wallet_value
+  > result(
+    std::make_unique<
+      chratex::mdb_iterator<chratex::uint256_union, chratex::wallet_value>
+    >(
       transaction, 
       handle,
       chratex::database::mdb_val(
         chratex::uint256_union(special_count)
       )
     )
-  );
+  );*/
 	return result;
 }
 
-chratex::store_iterator chratex::wallet_store::begin(
-  MDB_txn *transaction, chratex::uint256_union const & key
+chratex::store_iterator<
+  chratex::uint256_union, chratex::wallet_value
+> chratex::wallet_store::begin(
+  MDB_txn *transaction_a, chratex::uint256_union const & key
 ) {
-	chratex::store_iterator result(
-    std::make_unique<chratex::mdb_iterator>(
+  chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> result (std::make_unique<chratex::mdb_iterator<chratex::uint256_union, chratex::wallet_value>> (transaction_a, handle, chratex::database::mdb_val (key)));
+	/*chratex::store_iterator<
+    chratex::uint256_union, chratex::wallet_value
+  > result(
+    std::make_unique<
+      chratex::mdb_iterator<chratex::uint256_union, chratex::wallet_value>
+    >(
       transaction, handle, database::mdb_val(key)
     )
-  );
+  );*/
 	return result;
 }
 
-chratex::store_iterator chratex::wallet_store::find(
+chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> chratex::wallet_store::find(
   MDB_txn *transaction, chratex::uint256_union const &key
 ) {
 	auto result(begin(transaction, key));
-	chratex::store_iterator end(nullptr);
+	chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> end(nullptr);
 	if (result != end) {
 		if (chratex::uint256_union(result->first) == key) {
 			return result;
@@ -481,6 +495,6 @@ chratex::store_iterator chratex::wallet_store::find(
 	return result;
 }
 
-chratex::store_iterator chratex::wallet_store::end () {
-	return chratex::store_iterator(nullptr);
+chratex::store_iterator<chratex::uint256_union, chratex::wallet_value> chratex::wallet_store::end () {
+	return chratex::store_iterator<chratex::uint256_union, chratex::wallet_value>(nullptr);
 }

@@ -198,10 +198,10 @@ target_compile_definitions(blake2 PRIVATE -D__SSE2__)
 
 add_library(libchratex
   src/config.hpp
+  ${lib_files}
   ${net_files}
   ${utility_files}
   ${database_files}
-  ${lib_files}
   ${wallet_files}
   ${WORKING_DIR}
 )
