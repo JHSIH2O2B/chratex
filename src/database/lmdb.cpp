@@ -18,14 +18,17 @@
  */
 
 #include <database/lmdb.hpp>
+#include <iostream>
 
 chratex::mdb_env::mdb_env(
-  bool &error_a, boost::filesystem::path const & path_a, int max_dbs
+  bool &error_a, boost::filesystem::path const &path_a, int max_dbs
 ) {
   boost::system::error_code error;
   if (path_a.has_parent_path()) {
 
-    boost::filesystem::create_directories (path_a.parent_path (), error);
+    std::cout << path_a << std::endl;
+
+    boost::filesystem::create_directories(path_a.parent_path (), error);
 
     if (!error) {
       auto status1 = mdb_env_create(&environment);
@@ -36,7 +39,7 @@ chratex::mdb_env::mdb_env(
       assert(status3 == 0);
       // It seems if there's ever more threads than mdb_env_set_maxreaders has read slots available, we get failures on transaction creation unless MDB_NOTLS is specified
       // This can happen if something like 256 io_threads are specified in the node config
-      auto status4(mdb_env_open(environment, path_a.string ().c_str (), MDB_NOSUBDIR | MDB_NOTLS, 00600));
+      auto status4(mdb_env_open(environment, path_a.string().c_str (), MDB_NOSUBDIR | MDB_NOTLS, 00600));
       error_a = status4 != 0;
     }
 

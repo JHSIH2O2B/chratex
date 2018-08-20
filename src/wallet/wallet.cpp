@@ -21,7 +21,10 @@
 #include <utility/random_entropy.hpp>
 #include <bitcoin/bitcoin/wallet/mnemonic.hpp>
 
-chratex::wallet::wallet() {
+chratex::wallet::wallet(
+  chratex::transaction &transaction,
+  const std::string &wall
+) : store(transaction, wall) {
   auto chunk(chratex::create_cs_random());
   auto mnemonic(libbitcoin::wallet::create_mnemonic(chunk));
 

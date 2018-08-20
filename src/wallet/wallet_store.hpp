@@ -17,14 +17,33 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <gtest/gtest.h>
-#include <wallet/wallet.hpp>
-#include <utility/filesystem.hpp>
+#pragma once
 
-TEST(wallet, creating_new_wallet) {
-  bool init;
-  chratex::mdb_env environment(init, chratex::filesystem::unique_path());
-  ASSERT_FALSE(init);
-  auto transaction(chratex::transaction(environment, nullptr, true));
-  auto wallet_store = chratex::wallet_store(transaction, "0");
+#ifndef CHRATEX_WALLET_WALLET_STORE_HPP
+#define CHRATEX_WALLET_WALLET_STORE_HPP
+
+#include <database/lmdb.hpp>
+#include <lib/numbers.hpp>
+
+namespace chratex {
+
+class wallet_store {
+public:
+  wallet_store(
+    chratex::transaction &transaction, 
+    const std::string &wallet
+  );
+
+  bool init(MDB_txn *transaction, const std::string &path);
+
+  static chratex::uint256_union const version_special;
+  
+private:
+  chratex::mdb_env &environment;
+  MDB_dbi handle;
+
+};
+
 }
+
+#endif

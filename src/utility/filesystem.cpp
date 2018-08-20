@@ -33,13 +33,25 @@ boost::filesystem::path working_path() {
 
   switch (chratex::network::current) {
     case chratex::networks::test_network:
-      result /= "chratex_test";
+#ifdef __APPLE__
+      result /= "ChratexTest";
+#else
+      result /= "chratextest";
+#endif
       break;
     case chratex::networks::beta_network:
-      result /= "chratex_beta";
+#ifdef __APPLE__
+      result /= "ChratexBeta";
+#else
+      result /= "chratexbeta";
+#endif
       break;
     case chratex::networks::live_network:
+#ifdef __APPLE__
+      result /= "Chratex";
+#else
       result /= "chratex";
+#endif
       break;
     default:
       break;

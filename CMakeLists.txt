@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.8)
-project (chratos-exchange LANGUAGES CXX C)
+project (chratos-exchange)
+
+set(CMAKE_INSTALL_RPATH "@executable_path/../Frameworks")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 include_directories("${CMAKE_SOURCE_DIR}/src")
 include_directories("gtest/include")
@@ -50,8 +55,14 @@ else (WIN32)
 	endif()
 endif (WIN32)
 
-set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_C_STANDARD 11)
+set(CMAKE_C_STANDARD_REQUIRED ON)
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+set(Boost_USE_STATIC_LIBS        ON)
+set(Boost_USE_MULTITHREADED      ON)
 
 find_package (Boost 1.67.0
   REQUIRED COMPONENTS 
@@ -194,6 +205,11 @@ add_library(blake2
 	${BLAKE2_IMPLEMENTATION}
 )
 
+add_library (xxhash
+	xxhash/xxhash.c
+	xxhash/xxhash.h
+)
+
 target_compile_definitions(blake2 PRIVATE -D__SSE2__)
 
 add_library(libchratex
@@ -217,8 +233,11 @@ add_executable(chratex_test
 
 target_link_libraries(chratexd
   libbitcoin 
-  ed25519
   libchratex
+  ed25519
+  xxhash
+  blake2
+  lmdb
   ${Boost_LIBRARIES}
   ${PLATFORM_LINK_FLAGS}
   ${CRYPTOPP_LIBRARY}
@@ -227,7 +246,11 @@ target_link_libraries(chratexd
 target_link_libraries(chratex_test 
   libbitcoin 
   gtest_main
+  ed25519
+  xxhash
   libchratex
+  blake2
+  lmdb
   ${Boost_LIBRARIES}
   ${PLATFORM_LINK_FLAGS}
   ${CRYPTOPP_LIBRARY}

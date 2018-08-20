@@ -22,13 +22,19 @@
 #ifndef CHRATEX_WALLET_WALLET_HPP
 #define CHRATEX_WALLET_WALLET_HPP
 
+#include <wallet/wallet_store.hpp>
+
 namespace chratex {
 
 class wallet {
   public:
-    wallet();
+    wallet(
+      chratex::transaction &transaction,
+      const std::string &path
+    );
 
   private:
+    chratex::wallet_store store;
 };
 
 }
